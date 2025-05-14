@@ -13,6 +13,8 @@ import { constant } from '../framework/constant';
 import { localConfig } from '../framework/localConfig';
 import { Boss } from './boss';
 import { AudioManager } from '../framework/audioManager';
+import {RigidBody} from "cc";
+
 const { ccclass, property } = _decorator;
 
 @ccclass('GameManager')
@@ -36,6 +38,7 @@ export class GameManager extends Component {
     public static scriptPlayer: Player = null!;//玩家脚本
     public static scriptGameCamera: GameCamera;//相机脚本
     public static ndPlayer: Node = null!;//玩家节点
+    public static arrPlayer: Node[] = []; //玩家数组
     public static ndBoss: Node = null!;//小怪节点
     public static scriptBoss: Boss = null!;//boss脚本
     public static ndGameManager: Node;//游戏全局管理节点
@@ -217,7 +220,7 @@ export class GameManager extends Component {
      * @private
      * @memberof GameManager
      */
-    private _createPlayer () {      
+    private _createPlayer () {
         resourceUtil.loadModelRes("player/player01").then((pf: any)=>{
             GameManager.ndPlayer = poolManager.instance.getNode(pf, this.node) as Node;
             
@@ -238,6 +241,36 @@ export class GameManager extends Component {
             } else {
                 clientEvent.dispatchEvent(constant.EVENT_TYPE.HIDE_LOADING_PANEL);
             }
+        })
+
+        // 创建玩家的小怪
+        resourceUtil.loadModelRes("monster/aula").then((pf: any)=>{
+            let ndChild = poolManager.instance.getNode(pf, this.node) as Node;
+            GameManager.arrPlayer.push(ndChild as Node);
+
+            let baseInfo = localConfig.instance.queryByID("base", constant.BASE.AULA);
+
+            // let position = baseInfo.position.split(',');
+            let angle = baseInfo.angle.split(',');
+            let scale = baseInfo.scale.split(',');
+            // ndChild.setPosition(new Vec3(Number(position[0]), Number(position[1]), Number(position[2])));
+            ndChild.eulerAngles = new Vec3(Number(angle[0]), Number(angle[1]), Number(angle[2]));
+            ndChild.setScale(new Vec3(Number(scale[0]), Number(scale[1]), Number(scale[2])));
+            ndChild.setPosition(new Vec3(-10.65,1.65, 0));
+
+            let rigidBody = ndChild.getComponent(RigidBody) as RigidBody;
+            rigidBody.setGroup(constant.PHY_GROUP.PLAYER)
+
+            let layinfo = {
+                ID: "2001",
+                position: "-8.65,1.65, 0",
+                angle: "",
+                scale:"",
+                skill:"102",
+                movePattern: 1
+            }
+            ndChild.getComponent(Monster)?.init(baseInfo, layinfo);
+
         })
     }
 

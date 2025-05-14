@@ -19,6 +19,8 @@ import { FireBallBig } from './monsterSkill/fireBallBig';
 import { Tornado } from './monsterSkill/tornado';
 import { Laser } from './monsterSkill/laser';
 import { CharacterRigid } from './characterRigid';
+import {RigidBody} from 'cc'
+
 //怪物组件
 let qt_0 = new Quat();
 let v3_0 = new Vec3();
@@ -41,6 +43,7 @@ export class Monster extends Component {
     public attackPos: Vec3 = new Vec3();//技能即将攻击的位置
     public rigidComMonster: RigidBodyComponent = null!;
     public scriptCharacterRigid: CharacterRigid = null!;
+
     public set curMoveSpeed (v: number) {
         this._curMoveSpeed = v;
         this.scriptCharacterRigid.initSpeed(v, GameManager.moveSpeedAddition);
@@ -145,6 +148,7 @@ export class Monster extends Component {
     public init(baseInfo: any, layerInfo: any) {
         this.baseInfo = baseInfo;
         this.layerInfo = layerInfo;
+        console.log("怪物初始化", layerInfo);
         this.isDie = false;
         
         this.recycleWarning();
@@ -442,7 +446,12 @@ export class Monster extends Component {
                 this._horizontal = 0;
                 this._vertical = 0;
 
-                if (GameManager.ndPlayer) {
+                let ndEnemy = this.getNearestPlayer();
+                if (ndEnemy=== null) {
+                    break;
+                }
+
+                if (ndEnemy) {
                     this._attackPlayer();
                 } else {
                     this.scriptMonsterModel.playAni(constant.MONSTER_ANI_TYPE.IDLE, true);
@@ -457,6 +466,53 @@ export class Monster extends Component {
     }
 
     /**
+     * 获取最近的玩家
+     */
+    public getNearestPlayer () {
+        let rigidBody = this.getComponent(RigidBody) as RigidBody
+        // 如果是玩家自己的小怪，不处理，如果是其他怪物，则需要找最近的玩家小怪，进行攻击
+        if (rigidBody.getGroup() != constant.PHY_GROUP.PLAYER) {
+            if (GameManager.arrPlayer.length) {
+                let offsetA: Vec3 = new Vec3();
+                let offsetB: Vec3 = new Vec3();
+
+                let playerWorPos = this.node?.worldPosition as Vec3;
+                let arr = GameManager.arrPlayer.sort((a: any, b: any)=>{
+                    let distanceA = Vec3.subtract(offsetA, playerWorPos, a.worldPosition).length();
+                    let distanceB = Vec3.subtract(offsetB, playerWorPos, b.worldPosition).length();
+                    return  distanceA - distanceB;
+                })
+
+                return arr[0];
+            } else {
+                return null;
+            }
+        } else {
+            // 是自己的小怪
+            if (GameManager.arrMonster.length) {
+                let offsetA: Vec3 = new Vec3();
+                let offsetB: Vec3 = new Vec3();
+
+                let playerWorPos = this.node?.worldPosition as Vec3;
+                let arr = GameManager.arrMonster.sort((a: any, b: any)=>{
+                    let distanceA = Vec3.subtract(offsetA, playerWorPos, a.worldPosition).length();
+                    let distanceB = Vec3.subtract(offsetB, playerWorPos, b.worldPosition).length();
+                    return  distanceA - distanceB;
+                })
+
+                arr = arr.filter((item: Node)=>{
+                    let scriptMonster = item.getComponent(Monster) as Monster;
+                    return item.parent !== null && !scriptMonster.isDie;
+                })
+
+                return arr[0];
+            } else {
+                return null;
+            }
+        }
+    }
+
+    /**
      * 攻击玩家
     */
     protected _attackPlayer () {
@@ -464,10 +520,16 @@ export class Monster extends Component {
             return;
         }
 
-        Vec3.subtract(this._offsetPos_2, GameManager.ndPlayer.worldPosition, this.node.worldPosition);
+        let ndEnemy = this.getNearestPlayer();
+        if (!ndEnemy) {
+            console.log("###小怪找不到最近的玩家");
+            return;
+        }
+
+        Vec3.subtract(this._offsetPos_2, ndEnemy.worldPosition, this.node.worldPosition);
         let length = this._offsetPos_2.length();
         this.attackForward = this._offsetPos_2.normalize().negative();
-        this.attackPos.set(GameManager.ndPlayer.worldPosition);
+        this.attackPos.set(ndEnemy.worldPosition);
 
         //预警
         if (this.allSkillInfo.length && this.skillInfo && this.skillInfo.warning) {
@@ -522,8 +584,14 @@ export class Monster extends Component {
                 }
             });
         } else {
+            let ndEnemy = this.getNearestPlayer();
+            if (!ndEnemy) {
+                console.log("###小怪找不到最近的玩家");
+                return;
+            }
+
             //近战
-            let offsetLength = util.getTwoNodeXZLength(this.node, GameManager.ndPlayer);
+            let offsetLength = util.getTwoNodeXZLength(this.node, ndEnemy);
             if (offsetLength <= this._minLength * this._minLengthRatio) {
                 this.scriptMonsterModel.playAni(attackAniName, false, ()=>{
                     if (!this.isDie && !this.scriptMonsterModel.isHitting) {
@@ -550,7 +618,13 @@ export class Monster extends Component {
         // console.log("###随机移动", x, z);
         this._targetWorPos.set(util.toFixed(this.node.worldPosition.x + x), util.toFixed(this.node.worldPosition.y), util.toFixed(this.node.worldPosition.z + z));
 
-        let offsetLength = util.getTwoPosXZLength(this._targetWorPos.x, this._targetWorPos.z, GameManager.ndPlayer.worldPosition.x, GameManager.ndPlayer.worldPosition.z);
+        let ndEnemy = this.getNearestPlayer();
+        if (!ndEnemy) {
+            console.log("###小怪找不到最近的玩家");
+            return;
+        }
+
+        let offsetLength = util.getTwoPosXZLength(this._targetWorPos.x, this._targetWorPos.z, ndEnemy.worldPosition.x, ndEnemy.worldPosition.z);
         //当目标位置和玩家大于最小距离，进行移动
         if (offsetLength > this._minLength) {
             Vec3.subtract(this._offsetPos, this._targetWorPos, this.node.worldPosition);
@@ -596,10 +670,17 @@ export class Monster extends Component {
         } else if (this._movePattern === constant.MONSTER_MOVE_PATTERN.FORWARD_PLAYER) {
             //面向玩家移动：先面向玩家，再移动，然后攻击
             this._lookAtTargetWorPos();
-            Vec3.subtract(this._offsetPos, GameManager.ndPlayer.worldPosition, this.node.worldPosition);
+
+            let ndEnemy = this.getNearestPlayer();
+            if (!ndEnemy) {
+                console.log("###小怪找不到最近的玩家");
+                return;
+            }
+
+            Vec3.subtract(this._offsetPos, ndEnemy.worldPosition, this.node.worldPosition);
             this._offsetPos.y = 0;
 
-            let offsetLength = util.getTwoNodeXZLength(this.node, GameManager.ndPlayer);
+            let offsetLength = util.getTwoNodeXZLength(this.node, ndEnemy);
             //当怪物和玩家小于2个最小距离之和或者大于一个最小距离且小于两个最小距离，进行移动
             if (offsetLength > this._minLength * 2 || (offsetLength > this._minLength && offsetLength < this._minLength * 2)) {
                 //单位向量
@@ -610,7 +691,12 @@ export class Monster extends Component {
                     //向玩家移动2个单位向量
                     Vec3.add(this._targetWorPos, this.node.worldPosition, this._offsetPos);
                 } else {
-                    Vec3.subtract(this._targetWorPos, GameManager.ndPlayer.worldPosition, this._offsetPos);
+                    let ndEnemy = this.getNearestPlayer();
+                    if (!ndEnemy) {
+                        console.log("###小怪找不到最近的玩家");
+                        return;
+                    }
+                    Vec3.subtract(this._targetWorPos, ndEnemy.worldPosition, this._offsetPos);
                 }
                
                 this._targetWorPos.set(util.toFixed(this._targetWorPos.x), util.toFixed(this.node.worldPosition.y), util.toFixed(this._targetWorPos.z));
@@ -629,7 +715,13 @@ export class Monster extends Component {
      * @memberof Monster
      */
     protected _lookAtTargetWorPos (targetWorPos?: Vec3) {
-        let screenPos1 = GameManager.mainCamera?.worldToScreen(GameManager.ndPlayer.worldPosition) as Vec3;
+        let ndEnemy = this.getNearestPlayer();
+        if (!ndEnemy) {
+            console.log("###小怪找不到最近的玩家");
+            return;
+        }
+
+        let screenPos1 = GameManager.mainCamera?.worldToScreen(ndEnemy.worldPosition) as Vec3;
         let screenPos2 =  GameManager.mainCamera?.worldToScreen(this.node.worldPosition) as Vec3;
         if (targetWorPos) {
             screenPos1 = GameManager.mainCamera?.worldToScreen(targetWorPos) as Vec3;
@@ -648,16 +740,22 @@ export class Monster extends Component {
      * @memberof Player
      */
     public releaseSkillToPlayer (isNormalAttack?:boolean) {
+        let ndEnemy = this.getNearestPlayer();
+        if (!ndEnemy) {
+            console.log("###小怪找不到最近的玩家");
+            return;
+        }
+
         //没有技能则使用近战
         if (!this.allSkillInfo.length) {
-            let offsetLength = util.getTwoNodeXZLength(this.node, GameManager.ndPlayer);
+            let offsetLength = util.getTwoNodeXZLength(this.node, ndEnemy);
             if (offsetLength <= this._minLength * this._minLengthRatio) {
                 GameManager.scriptPlayer.reduceBlood(this.baseInfo);
             }
             return;
         }
 
-        this.node.forward = Vec3.subtract(this._forWard, GameManager.ndPlayer.worldPosition, this.node.worldPosition).normalize();
+        this.node.forward = Vec3.subtract(this._forWard, ndEnemy.worldPosition, this.node.worldPosition).normalize();
 
         //加载对应技能
         resourceUtil.loadEffectRes(`${this.skillInfo.resName}/${this.skillInfo.resName}`).then((prefab: any)=>{
