@@ -1,0 +1,134 @@
+{
+  "__version__": "1.0.0",
+  "current-scene": "",
+  "gizmos-infos": {
+    "is2D": false,
+    "is3DIcon": false,
+    "iconSize": 2,
+    "gridVisible": true,
+    "gridColor": [
+      150,
+      150,
+      150,
+      255
+    ],
+    "isIconGizmo3D": false,
+    "iconGizmoSize": 2,
+    "isGridVisible": true
+  },
+  "camera-infos": {
+    "f46876e4-e81b-4931-b493-6d367be385e7": {
+      "position": {
+        "x": -10,
+        "y": 10,
+        "z": 5000
+      },
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "viewCenter": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    },
+    "127d7348-d43d-46d5-bb17-8678928b6a94": {
+      "position": {
+        "x": -622.9608114714322,
+        "y": 542.227789011911,
+        "z": 536.3677650788702
+      },
+      "rotation": {
+        "x": -0.25747905979322805,
+        "y": -0.3997391229544814,
+        "z": -0.11806446874771084,
+        "w": 0.8717648470584816
+      },
+      "viewCenter": {
+        "x": -10.479043394781797,
+        "y": 19.136810865199465,
+        "z": 8.930817244345917
+      }
+    },
+    "3002aa1c-6385-4a59-b6f6-2110e8f1325b": {
+      "position": {
+        "x": 12.51285812592544,
+        "y": 12.512858125925451,
+        "z": 12.512858125925451
+      },
+      "rotation": {
+        "x": -0.27984814233312133,
+        "y": 0.3647051996310009,
+        "z": 0.11591689595929514,
+        "w": 0.8804762392171493
+      },
+      "viewCenter": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    },
+    "dfb9aa98-c561-4c0d-84a4-3c7dc8990040": {
+      "position": {
+        "x": 360,
+        "y": 640,
+        "z": 5000
+      },
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "viewCenter": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      }
+    },
+    "dcce5fd3-e1dd-4c4e-afff-56b11e1bbd91": {
+      "position": {
+        "x": 360,
+        "y": 640,
+        "z": 5000
+      },
+      "rotation": {
+        "x": 0,
+        "y": 0,
+        "z": 0,
+        "w": 1
+      },
+      "viewCenter": {
+        "x": 360,
+        "y": 640,
+        "z": 0
+      }
+    }
+  },
+  "camera-uuids": [
+    "127d7348-d43d-46d5-bb17-8678928b6a94"
+  ],
+  "float-window": {
+    "position": {
+      "cc": {
+        "ParticleSystem": {
+          "dock": false,
+          "top": null,
+          "bottom": 10,
+          "left": null,
+          "right": 10
+        },
+        "Camera": {
+          "dock": false,
+          "top": null,
+          "bottom": 10,
+          "left": null,
+          "right": 10
+        }
+      }
+    }
+  }
+}
