@@ -70,6 +70,17 @@ export class FightPanel extends Component {
         GameManager.isGamePause = true;
     }
 
+    public onBtnMonsterRevClick () {
+        let move_gold = playerData.instance.playerInfo.level%10 + 10;
+        if (move_gold > playerData.instance.playerInfo.gold)
+            return
+
+        GameManager.addGold(-move_gold);
+        AudioManager.instance.playSound(constant.SOUND.CLICK);
+        let id = 1
+        clientEvent.dispatchEvent(constant.EVENT_TYPE.MONSTER_REVIVE, id);
+    }
+
     public onBtnDebugClick () {
         AudioManager.instance.playSound(constant.SOUND.CLICK);
 

@@ -103,6 +103,7 @@ export class constant {
         PARSE_PLAYER_SKILL: "parsePlayerSkill",//解析玩家技能
 
         MONSTER_MOVE: "monsterMove",//怪物开始移动
+        MONSTER_REVIVE: "monsterRevive",//怪物复活
     }
 
     //战斗血量提示

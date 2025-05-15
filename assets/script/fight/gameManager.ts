@@ -96,6 +96,7 @@ export class GameManager extends Component {
         clientEvent.on(constant.EVENT_TYPE.ON_GAME_PAUSE, this._onGamePause, this);
         clientEvent.on(constant.EVENT_TYPE.REFRESH_LEVEL, this._refreshLevel, this);
         clientEvent.on(constant.EVENT_TYPE.RECYCLE_ALL, this._recycleAll, this);
+        clientEvent.on(constant.EVENT_TYPE.MONSTER_REVIVE, this._revPlayerMonster, this);
     }
 
     onDisable () {
@@ -104,6 +105,7 @@ export class GameManager extends Component {
         clientEvent.off(constant.EVENT_TYPE.ON_GAME_PAUSE, this._onGamePause, this);
         clientEvent.off(constant.EVENT_TYPE.REFRESH_LEVEL, this._refreshLevel, this);
         clientEvent.off(constant.EVENT_TYPE.RECYCLE_ALL, this._recycleAll, this);
+        clientEvent.off(constant.EVENT_TYPE.MONSTER_REVIVE, this._revPlayerMonster, this);
     }
 
     start () {
@@ -210,10 +212,12 @@ export class GameManager extends Component {
                 // uiManager.instance.hideDialog("countdown/countdownPanel");
 
                 // 设置游戏开始状态
-                GameManager.isGameStart = true;
-                AudioManager.instance.resumeAll();
-                clientEvent.dispatchEvent(constant.EVENT_TYPE.MONSTER_MOVE);
-                console.log("游戏正式开始！");
+                if (!GameManager.isGameStart) {
+                    GameManager.isGameStart = true;
+                    AudioManager.instance.resumeAll();
+                    clientEvent.dispatchEvent(constant.EVENT_TYPE.MONSTER_MOVE);
+                    console.log("游戏正式开始！");
+                }
             }
         }, 1000);
     }
@@ -282,6 +286,10 @@ export class GameManager extends Component {
             }
         })
 
+        this._createAula();
+    }
+
+    private _createAula(is_move: boolean=false) {
         // 创建玩家的小怪
         resourceUtil.loadModelRes("monster/aula").then((pf: any)=>{
             let ndChild = poolManager.instance.getNode(pf, this.node) as Node;
@@ -310,8 +318,22 @@ export class GameManager extends Component {
             }
             ndChild.getComponent(Monster)?.init(baseInfo, layinfo);
 
+            if (is_move) {
+                clientEvent.dispatchEvent(constant.EVENT_TYPE.MONSTER_MOVE);
+            }
         })
     }
+
+    private _revPlayerMonster (id: number) {
+        if (GameManager.isGameOver) {
+            return;
+        }
+        if (id === 1) { //玩家
+            // 创建玩家的小怪, 并马上行动
+            this._createAula(true);
+        }
+    }
+
 
     /**
      * 回收怪兽, 武器，特效等
