@@ -10,6 +10,7 @@ import { FireBall } from './monsterSkill/fireBall';
 import { FireBallBig } from './monsterSkill/fireBallBig';
 import { Laser } from './monsterSkill/laser';
 import { Tornado } from './monsterSkill/tornado';
+import {Monster} from "db://assets/script/fight/monster";
 //怪物武器碰撞器/触发器组件
 const { ccclass, property } = _decorator;
 
@@ -131,31 +132,30 @@ export class MonsterSkillCollider extends Component {
                     }
                     break;
             }   
-        } else if (otherCollider.getGroup() == constant.PHY_GROUP.PLAYER  && GameManager.ndPlayer) {
+        }
+        else if (otherCollider.getGroup() == constant.PHY_GROUP.PLAYER  || otherCollider.getGroup() == constant.PHY_GROUP.MONSTER)  {
             let scriptSkillCollider: any = null;
 
             switch (this.colliderName) {
                 case COLLIDER_NAME.ENERGY_BALL:
                     poolManager.instance.putNode(this.node);
-
                     scriptSkillCollider = this.node.getComponent(EnergyBall) as EnergyBall;
-                    this._hitPlayer(scriptSkillCollider.baseInfo);
+                    this._hitMonster(otherCollider, scriptSkillCollider)
                     break;
                 case COLLIDER_NAME.FIRE_BALL:
                     //不在这里回收节点.在fireBall里面会回收
                     scriptSkillCollider = this.node.parent?.getComponent(FireBall) as FireBall;
-                    this._hitPlayer(scriptSkillCollider.baseInfo);
+                    this._hitMonster(otherCollider, scriptSkillCollider)
                     break;
                 case COLLIDER_NAME.DISPERSION:
                     //注意这里不回收节点，只回收父节点
                     scriptSkillCollider = this.node.getComponent(Dispersion) as Dispersion;
                     scriptSkillCollider.hide();
-
-                    this._hitPlayer(scriptSkillCollider.baseInfo);
+                    this._hitMonster(otherCollider, scriptSkillCollider)
                     break;
                 case COLLIDER_NAME.TORNADO:
                     scriptSkillCollider = this.node.parent?.getComponent(Tornado) as Tornado;
-                    this._hitPlayer(scriptSkillCollider.baseInfo);
+                    this._hitMonster(otherCollider, scriptSkillCollider)
                     break;
                 case COLLIDER_NAME.FIRE_BALL_BIG:
                     scriptSkillCollider = this.node.parent?.getComponent(FireBallBig) as FireBallBig;
@@ -165,11 +165,11 @@ export class MonsterSkillCollider extends Component {
                     //注意这里不回收，只回收父节点
                     scriptSkillCollider = this.node.getComponent(DispersionSurround) as DispersionSurround;
                     scriptSkillCollider.hide();
-                    this._hitPlayer(scriptSkillCollider.baseInfo);
+                    this._hitMonster(otherCollider, scriptSkillCollider)
                     break;
                 case COLLIDER_NAME.LASER:
                     scriptSkillCollider = this.node.parent?.getComponent(Laser) as Laser;
-                    this._hitPlayer(scriptSkillCollider.baseInfo);
+                    this._hitMonster(otherCollider, scriptSkillCollider)
                     break;
             }
         }
@@ -182,6 +182,18 @@ export class MonsterSkillCollider extends Component {
         }
         console.log("###技能碰到玩家了", this.colliderName);
         GameManager.scriptPlayer.reduceBlood(baseInfo);
+    }
+
+    private _hitMonster(otherCollider: any, scriptSkillCollider: any) {
+        let ndMonster = otherCollider.node as Node;
+        let scriptMonster = ndMonster.getComponent(Monster) as Monster;
+        if (scriptMonster) {
+            scriptMonster.reduceBlood(scriptSkillCollider.baseInfo);
+        }
+        else {
+            // 没有玩家的小怪，只能打玩家了
+            this._hitPlayer(scriptSkillCollider.baseInfo);
+        }
     }
 
     /**

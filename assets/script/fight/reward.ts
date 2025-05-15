@@ -184,6 +184,10 @@ export class Reward extends Component {
             console.log("###已吸入全部奖品");
             AudioManager.instance.playSound(constant.SOUND.GOLD_COLLECT);
             clientEvent.dispatchEvent(constant.EVENT_TYPE.SHOW_WARP_GATE);
+
+            // 直接进入下一关
+            GameManager.scriptPlayer.scriptCharacterRigid.stopMove();
+            GameManager.isWin = true;
         }
     }
 

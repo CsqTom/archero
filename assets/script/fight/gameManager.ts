@@ -87,6 +87,9 @@ export class GameManager extends Component {
     private static _gameSpeed: number = 1;//游戏速度
     private static _isWin: boolean = false;//是否取得胜利
 
+    private _countdownTimer: any = null;// 倒计时计时器引用
+    private _countdownValue: number = 0;// 倒计时剩余时间
+
     onEnable () {
         clientEvent.on(constant.EVENT_TYPE.ON_GAME_INIT, this._onGameInit, this);
         clientEvent.on(constant.EVENT_TYPE.ON_GAME_OVER, this._onGameOver, this);
@@ -177,6 +180,42 @@ export class GameManager extends Component {
         AudioManager.instance.pauseAll();
 
         this._refreshLevel();
+
+        // 在刷新关卡后开始倒计时（根据实际需求调整位置）
+        this._startGameCountdown(); // <-- 新增倒计时
+    }
+
+    /**
+     * 开始游戏倒计时
+     */
+     private _startGameCountdown() {
+        // 显示倒计时UI（需要先在uiManager中实现对应的面板）
+        // uiManager.instance.showDialog("countdown/countdownPanel");
+
+        this._countdownValue = 5; // 倒计时N秒
+        GameManager.isGameStart = false;
+
+        // 每秒更新一次倒计时
+        this._countdownTimer = setInterval(() => {
+            this._countdownValue--;
+
+            // 更新倒计时显示
+            // clientEvent.dispatchEvent(constant.EVENT_TYPE.UPDATE_COUNTDOWN, this._countdownValue);
+
+            if (this._countdownValue <= 0) {
+                clearInterval(this._countdownTimer);
+                this._countdownTimer = null;
+
+                // 隐藏倒计时UI
+                // uiManager.instance.hideDialog("countdown/countdownPanel");
+
+                // 设置游戏开始状态
+                GameManager.isGameStart = true;
+                AudioManager.instance.resumeAll();
+                clientEvent.dispatchEvent(constant.EVENT_TYPE.MONSTER_MOVE);
+                console.log("游戏正式开始！");
+            }
+        }, 1000);
     }
 
     /**
@@ -285,7 +324,13 @@ export class GameManager extends Component {
 
         for (let i = this.node.children.length - 1; i >= 0; i--) {
             const ndChild = this.node.children[i];
-            if (ndChild.name !== "player01") {
+
+            let rigidBody = ndChild.getComponent(RigidBody) as RigidBody;
+            if (rigidBody) {
+                if (rigidBody.getGroup() !== constant.PHY_GROUP.PLAYER) {
+                    poolManager.instance.putNode(ndChild);
+                }
+            } else if (ndChild.name !== "player01") {
                 poolManager.instance.putNode(ndChild);
             }
         }

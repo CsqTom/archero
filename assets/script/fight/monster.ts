@@ -392,6 +392,29 @@ export class Monster extends Component {
         }
     }
 
+    public reduceBlood (baseInfo: any) {
+        if (this.isDie) {
+            return;
+        }
+
+        // AudioManager.instance.playSound(constant.SOUND.HIT_PLAYER);
+
+        if (Math.random() > this.baseInfo.dodgeRate) {
+            //闪避失败
+            let tipType = constant.FIGHT_TIP.REDUCE_BLOOD;
+            //敌人扣到
+            let damage = baseInfo.attackPower * (1 - this.baseInfo.defensePower * GameManager.defenseAddition / (this.baseInfo.defensePower + 400));
+            let isCriticalHit = Math.random() <= baseInfo.criticalHitRate;//是否暴击
+            if (isCriticalHit) {
+                damage = damage * baseInfo.criticalHitDamage;
+                tipType = constant.FIGHT_TIP.CRITICAL_HIT;
+            }
+            console.log("###小怪扣血", damage);
+
+            this.refreshBlood(-damage, tipType);
+        }
+    }
+
     /**
      * 刷新血量
      *
@@ -482,6 +505,19 @@ export class Monster extends Component {
                     let distanceB = Vec3.subtract(offsetB, playerWorPos, b.worldPosition).length();
                     return  distanceA - distanceB;
                 })
+
+                arr = arr.filter((item: Node)=>{
+                    let scriptMonster = item.getComponent(Monster) as Monster;
+                    if (scriptMonster){
+                        return item.parent !== null && !scriptMonster.isDie;
+                    }
+                    return true;
+                })
+
+                // 所有玩家小怪都死了，只是打玩家了
+                if (arr.length === 0) {
+                    return GameManager.ndPlayer;
+                }
 
                 return arr[0];
             } else {
@@ -750,7 +786,7 @@ export class Monster extends Component {
         if (!this.allSkillInfo.length) {
             let offsetLength = util.getTwoNodeXZLength(this.node, ndEnemy);
             if (offsetLength <= this._minLength * this._minLengthRatio) {
-                GameManager.scriptPlayer.reduceBlood(this.baseInfo);
+                // GameManager.scriptPlayer.reduceBlood(this.baseInfo);
             }
             return;
         }
