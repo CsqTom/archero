@@ -261,8 +261,8 @@ export class GameManager extends Component {
                     // 设置初始位置
                     GameManager.arrPlayer.forEach((monster, index) => {
                         const baseX = -10.65;
-                        const xOffset = index * 2.0;
-                        monster.setPosition(new Vec3(baseX + xOffset, 1.65, 0));
+                        const xOffset = index * (6/playMonsterCount);
+                        monster.setPosition(new Vec3(baseX + xOffset, 1.62, -3 + xOffset));
                     });
 
                     clientEvent.dispatchEvent(constant.EVENT_TYPE.HIDE_LOADING_PANEL);

@@ -410,7 +410,7 @@ export class Monster extends Component {
                 damage = damage * baseInfo.criticalHitDamage;
                 tipType = constant.FIGHT_TIP.CRITICAL_HIT;
             }
-            console.log("###小怪扣血", damage);
+            // console.log("###小怪扣血", damage);
 
             this.refreshBlood(-damage, tipType);
         }
@@ -542,7 +542,7 @@ export class Monster extends Component {
                     if (scriptMonster) {
                         return item.parent !== null && !scriptMonster.isDie;
                     } else {
-                        return true;
+                        return false;
                     }
                 })
                 if (arr.length === 0) {
@@ -670,7 +670,7 @@ export class Monster extends Component {
 
         let offsetLength = util.getTwoPosXZLength(this._targetWorPos.x, this._targetWorPos.z, ndEnemy.worldPosition.x, ndEnemy.worldPosition.z);
         //当目标位置和玩家大于最小距离，进行移动
-        if (offsetLength > this._minLength) {
+        if (offsetLength > this._minLength && offsetLength < this._minLength * 3) {
             Vec3.subtract(this._offsetPos, this._targetWorPos, this.node.worldPosition);
             this._offsetPos.y = 0;
             Vec3.normalize(this._moveUnit, this._offsetPos);
@@ -1026,7 +1026,7 @@ export class Monster extends Component {
             
                 if (this._isStopAttack) {
                     this.playAction({action: constant.MONSTER_ACTION.STOP_MOVE});
-                    console.log("###碰到障碍, 停止移动");
+                    // console.log("###碰到障碍, 停止移动");
                 } else {
                     this._prevMoveWorPos.set(this.node.worldPosition);
                 }

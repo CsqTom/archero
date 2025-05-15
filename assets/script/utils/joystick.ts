@@ -290,7 +290,8 @@ export class Joystick extends Component {
             if (this.isMoving) {
                 if (this.angle !== this._oldAngle) {
                     this._oldAngle = this.angle;
-                    GameManager.scriptPlayer.playAction({action: constant.PLAYER_ACTION.MOVE, value: this.angle});
+                    // 由于调整主视角变更了45度，故这里在原来调整，防止玩家行走不对
+                    GameManager.scriptPlayer.playAction({action: constant.PLAYER_ACTION.MOVE, value: this.angle-45});
                 }
             } else {
                 this.isMoving = false;
