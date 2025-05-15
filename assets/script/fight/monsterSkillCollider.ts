@@ -159,7 +159,47 @@ export class MonsterSkillCollider extends Component {
                     break;
                 case COLLIDER_NAME.FIRE_BALL_BIG:
                     scriptSkillCollider = this.node.parent?.getComponent(FireBallBig) as FireBallBig;
-                    this._hitPlayer(scriptSkillCollider.baseInfo);
+                    this._hitMonster(otherCollider, scriptSkillCollider)
+                    break;
+                case COLLIDER_NAME.DISPERSION_SURROUND:
+                    //注意这里不回收，只回收父节点
+                    scriptSkillCollider = this.node.getComponent(DispersionSurround) as DispersionSurround;
+                    scriptSkillCollider.hide();
+                    this._hitMonster(otherCollider, scriptSkillCollider)
+                    break;
+                case COLLIDER_NAME.LASER:
+                    scriptSkillCollider = this.node.parent?.getComponent(Laser) as Laser;
+                    this._hitMonster(otherCollider, scriptSkillCollider)
+                    break;
+            }
+        }
+        else if (otherCollider.getGroup() == constant.PHY_GROUP.PLAYER  || otherCollider.getGroup() == constant.PHY_GROUP.MONSTER)  {
+            let scriptSkillCollider: any = null;
+
+            switch (this.colliderName) {
+                case COLLIDER_NAME.ENERGY_BALL:
+                    poolManager.instance.putNode(this.node);
+                    scriptSkillCollider = this.node.getComponent(EnergyBall) as EnergyBall;
+                    this._hitMonster(otherCollider, scriptSkillCollider)
+                    break;
+                case COLLIDER_NAME.FIRE_BALL:
+                    //不在这里回收节点.在fireBall里面会回收
+                    scriptSkillCollider = this.node.parent?.getComponent(FireBall) as FireBall;
+                    this._hitMonster(otherCollider, scriptSkillCollider)
+                    break;
+                case COLLIDER_NAME.DISPERSION:
+                    //注意这里不回收节点，只回收父节点
+                    scriptSkillCollider = this.node.getComponent(Dispersion) as Dispersion;
+                    scriptSkillCollider.hide();
+                    this._hitMonster(otherCollider, scriptSkillCollider)
+                    break;
+                case COLLIDER_NAME.TORNADO:
+                    scriptSkillCollider = this.node.parent?.getComponent(Tornado) as Tornado;
+                    this._hitMonster(otherCollider, scriptSkillCollider)
+                    break;
+                case COLLIDER_NAME.FIRE_BALL_BIG:
+                    scriptSkillCollider = this.node.parent?.getComponent(FireBallBig) as FireBallBig;
+                    this._hitMonster(otherCollider, scriptSkillCollider)
                     break;
                 case COLLIDER_NAME.DISPERSION_SURROUND:
                     //注意这里不回收，只回收父节点
@@ -222,7 +262,7 @@ export class MonsterSkillCollider extends Component {
                 this._checkInterval = 0;
 
                 let scriptSkillCollider = this.node.parent.getComponent(JetFires) as JetFires;
-                this._hitPlayer(scriptSkillCollider.baseInfo);
+                // this._hitMonster(otherCollider, scriptSkillCollider)
             }
         }
     }

@@ -20,6 +20,7 @@ import { Tornado } from './monsterSkill/tornado';
 import { Laser } from './monsterSkill/laser';
 import { CharacterRigid } from './characterRigid';
 import {RigidBody} from 'cc'
+import {Boss} from "db://assets/script/fight/boss";
 
 //怪物组件
 let qt_0 = new Quat();
@@ -525,7 +526,7 @@ export class Monster extends Component {
             }
         } else {
             // 是自己的小怪
-            if (GameManager.arrMonster.length) {
+            if (GameManager.arrMonster.length || GameManager.ndBoss) {
                 let offsetA: Vec3 = new Vec3();
                 let offsetB: Vec3 = new Vec3();
 
@@ -538,8 +539,15 @@ export class Monster extends Component {
 
                 arr = arr.filter((item: Node)=>{
                     let scriptMonster = item.getComponent(Monster) as Monster;
-                    return item.parent !== null && !scriptMonster.isDie;
+                    if (scriptMonster) {
+                        return item.parent !== null && !scriptMonster.isDie;
+                    } else {
+                        return true;
+                    }
                 })
+                if (arr.length === 0) {
+                    return GameManager.ndBoss;
+                }
 
                 return arr[0];
             } else {
@@ -751,13 +759,7 @@ export class Monster extends Component {
      * @memberof Monster
      */
     protected _lookAtTargetWorPos (targetWorPos?: Vec3) {
-        let ndEnemy = this.getNearestPlayer();
-        if (!ndEnemy) {
-            console.log("###小怪找不到最近的玩家");
-            return;
-        }
-
-        let screenPos1 = GameManager.mainCamera?.worldToScreen(ndEnemy.worldPosition) as Vec3;
+        let screenPos1 = GameManager.mainCamera?.worldToScreen(GameManager.ndPlayer.worldPosition) as Vec3;
         let screenPos2 =  GameManager.mainCamera?.worldToScreen(this.node.worldPosition) as Vec3;
         if (targetWorPos) {
             screenPos1 = GameManager.mainCamera?.worldToScreen(targetWorPos) as Vec3;
