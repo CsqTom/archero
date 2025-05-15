@@ -6,5 +6,6 @@
       "separateEngine": true,
       "appid": "wx0ee0dd280dc5bb68"
     }
-  }
+  },
+  "__version__": "1.0.1"
 }
