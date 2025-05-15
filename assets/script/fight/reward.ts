@@ -134,7 +134,12 @@ export class Reward extends Component {
 
             if (isAllDropOver) {
                 console.log("###所有的奖品都已经掉落到地上了");
-                clientEvent.dispatchEvent(constant.EVENT_TYPE.INHALE_REWARD);
+
+                // 修改后
+                setTimeout(() => {
+                    clientEvent.dispatchEvent(constant.EVENT_TYPE.SHOW_WARP_GATE);
+                    clientEvent.dispatchEvent(constant.EVENT_TYPE.INHALE_REWARD);
+                }, 50); // 转换为毫秒
             }
         }
     }
@@ -184,10 +189,6 @@ export class Reward extends Component {
             console.log("###已吸入全部奖品");
             AudioManager.instance.playSound(constant.SOUND.GOLD_COLLECT);
             clientEvent.dispatchEvent(constant.EVENT_TYPE.SHOW_WARP_GATE);
-
-            // 直接进入下一关
-            GameManager.scriptPlayer.scriptCharacterRigid.stopMove();
-            GameManager.isWin = true;
         }
     }
 
@@ -272,6 +273,12 @@ export class Reward extends Component {
                 this._checkInhaleOver();
                 // console.log("吸收奖品");
             }
+
+            // 直接进入下一关
+            setTimeout(() => {
+                GameManager.scriptPlayer.scriptCharacterRigid.stopMove();
+                GameManager.isWin = true;
+            }, 1200); // 转换为毫秒
         }
     }
 }

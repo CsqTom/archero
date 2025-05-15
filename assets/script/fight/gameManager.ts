@@ -226,6 +226,14 @@ export class GameManager extends Component {
      * 刷新关卡, 后期优化写法。。。
      */
     private _refreshLevel () {
+        let playMonsterCount = 0;
+        for (let i = 0; i < GameManager.arrPlayer.length; i++) {
+            if (!GameManager.arrPlayer[i].getComponent(Monster)?.isDie) {
+                playMonsterCount++;
+            }
+        }
+        console.log("playMonsterCount", playMonsterCount);
+
         //每层随机一张地图
         let arrMap = this.mapInfo.mapName.split("#");
         let mapName = arrMap[Math.floor(Math.random() * arrMap.length)];
@@ -238,6 +246,25 @@ export class GameManager extends Component {
                     this._createPlayer();
                 } else {
                     GameManager.scriptPlayer.resetPlayerState();
+
+                    // 清除现有小怪节点
+                    GameManager.arrPlayer.forEach(monster => {
+                        poolManager.instance.putNode(monster);
+                    });
+                    GameManager.arrPlayer = [];
+
+                    // 重新创建原有数量的小怪
+                    for(let i = 0; i < playMonsterCount; i++) {
+                        this._createAula();
+                    }
+
+                    // 设置初始位置
+                    GameManager.arrPlayer.forEach((monster, index) => {
+                        const baseX = -10.65;
+                        const xOffset = index * 2.0;
+                        monster.setPosition(new Vec3(baseX + xOffset, 1.65, 0));
+                    });
+
                     clientEvent.dispatchEvent(constant.EVENT_TYPE.HIDE_LOADING_PANEL);
                 }
             });
