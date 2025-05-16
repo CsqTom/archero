@@ -131,7 +131,7 @@ export class MapManager extends Component {
                         ndParent.parent = this.node;
                     }
 
-                    let ndChild = poolManager.instance.getNode(prefab, ndParent) as Node;
+                    let ndChild = poolManager.instance.getNode(prefab, ndParent, true) as Node;
                     let position = layerInfo.position ? layerInfo.position.split(',') : baseInfo.position.split(',');
                     let angle = layerInfo.angle ? layerInfo.angle.split(',') : baseInfo.angle.split(',');
                     let scale = layerInfo.scale ? layerInfo.scale.split(',') : baseInfo.scale.split(',');

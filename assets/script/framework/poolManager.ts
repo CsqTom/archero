@@ -32,8 +32,9 @@ export class poolManager {
 
     /**
      * 根据预设从对象池中获取对应节点
+     * 注意：创建新对象时，如果有需要区分分组，请一定要使用 is_new = true, 以免取得到旧对象
      */
-    public getNode (prefab: Prefab, parent: Node) {
+    public getNode (prefab: Prefab, parent: Node, is_new:boolean = false): Node {
         let name = prefab.name;
          //@ts-ignore
          if (!prefab.position) {
@@ -43,16 +44,24 @@ export class poolManager {
         
         this._dictPrefab[name] = prefab;
         let node = null;
-        if (this._dictPool.hasOwnProperty(name)) {
-            //已有对应的对象池
-            let pool = this._dictPool[name];
-            if (pool.size() > 0) {
-                node = pool.get();
+        if (!is_new) {
+            if (this._dictPool.hasOwnProperty(name)) {
+                //已有对应的对象池
+                let pool = this._dictPool[name];
+                if (pool.size() > 0) {
+                    node = pool.get();
+                } else {
+                    node = instantiate(prefab);
+                }
             } else {
+                //没有对应对象池，创建他！
+                let pool = new NodePool();
+                this._dictPool[name] = pool;
+
                 node = instantiate(prefab);
             }
         } else {
-            //没有对应对象池，创建他！
+            //创建新节点
             let pool = new NodePool();
             this._dictPool[name] = pool;
 
