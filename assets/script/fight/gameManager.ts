@@ -194,7 +194,7 @@ export class GameManager extends Component {
         // 显示倒计时UI（需要先在uiManager中实现对应的面板）
         // uiManager.instance.showDialog("countdown/countdownPanel");
 
-        this._countdownValue = 5; // 倒计时N秒
+        this._countdownValue = 3; // 倒计时N秒
         GameManager.isGameStart = false;
 
         // 每秒更新一次倒计时
@@ -319,7 +319,7 @@ export class GameManager extends Component {
     private _createAula(is_move: boolean=false) {
         // 创建玩家的小怪
         resourceUtil.loadModelRes("monster/aula").then((pf: any)=>{
-            let ndChild = poolManager.instance.getNode(pf, this.node) as Node;
+            let ndChild = poolManager.instance.getNode(pf, this.node, true) as Node;
             GameManager.arrPlayer.push(ndChild as Node);
 
             let baseInfo = localConfig.instance.queryByID("base", constant.BASE.AULA);
