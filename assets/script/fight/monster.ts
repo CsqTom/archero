@@ -732,9 +732,9 @@ export class Monster extends Component {
             //面向玩家移动：先面向玩家，再移动，然后攻击
             this._lookAtTargetWorPos();
 
-            let ndEnemy = this.getNearestPlayer();
+            let ndEnemy = this.getNearest();
             if (!ndEnemy) {
-                console.log("###小怪找不到最近的玩家");
+                console.log("###小怪找不到最近的玩家", this.node.name, this._showGroup());
                 return;
             }
 
