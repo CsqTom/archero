@@ -71,7 +71,7 @@ export class FightPanel extends Component {
     }
 
     public onBtnMonsterRevClick () {
-        let move_gold = playerData.instance.playerInfo.level%10 + 10;
+        let move_gold = playerData.instance.playerInfo.level%10 + 5;
         if (move_gold > playerData.instance.playerInfo.gold)
             return
 
@@ -80,6 +80,29 @@ export class FightPanel extends Component {
         let id = 1
         clientEvent.dispatchEvent(constant.EVENT_TYPE.MONSTER_REVIVE, id);
     }
+
+    public onBtnMonsterRevClick2 () {
+        let move_gold = playerData.instance.playerInfo.level%10 + 8;
+        if (move_gold > playerData.instance.playerInfo.gold)
+            return
+
+        GameManager.addGold(-move_gold);
+        AudioManager.instance.playSound(constant.SOUND.CLICK);
+        let id = 2
+        clientEvent.dispatchEvent(constant.EVENT_TYPE.MONSTER_REVIVE, id);
+    }
+
+    public onBtnMonsterRevClick3 () {
+        let move_gold = playerData.instance.playerInfo.level%10 + 20;
+        if (move_gold > playerData.instance.playerInfo.gold)
+            return
+
+        GameManager.addGold(-move_gold);
+        AudioManager.instance.playSound(constant.SOUND.CLICK);
+        let id = 3
+        clientEvent.dispatchEvent(constant.EVENT_TYPE.MONSTER_REVIVE, id);
+    }
+
 
     public onBtnDebugClick () {
         AudioManager.instance.playSound(constant.SOUND.CLICK);

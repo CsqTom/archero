@@ -11,6 +11,7 @@ export class StorageManager {
         if (this._instance) {
             return this._instance;
         }
+        sys.localStorage.clear()
 
         this._instance = new StorageManager();
         this._instance.start();

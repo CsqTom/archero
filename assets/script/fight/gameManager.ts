@@ -90,6 +90,12 @@ export class GameManager extends Component {
     private _countdownTimer: any = null;// 倒计时计时器引用
     private _countdownValue: number = 0;// 倒计时剩余时间
 
+    private _card1Count: number = 0;
+    private _card2Count: number = 0;
+    private _card3Count: number = 0;
+    private _card2name: string = "magician";
+    private _playerGold: number = 0;//玩家金币
+
     onEnable () {
         clientEvent.on(constant.EVENT_TYPE.ON_GAME_INIT, this._onGameInit, this);
         clientEvent.on(constant.EVENT_TYPE.ON_GAME_OVER, this._onGameOver, this);
@@ -97,6 +103,7 @@ export class GameManager extends Component {
         clientEvent.on(constant.EVENT_TYPE.REFRESH_LEVEL, this._refreshLevel, this);
         clientEvent.on(constant.EVENT_TYPE.RECYCLE_ALL, this._recycleAll, this);
         clientEvent.on(constant.EVENT_TYPE.MONSTER_REVIVE, this._revPlayerMonster, this);
+        clientEvent.on(constant.EVENT_TYPE.ON_REVIVE, this._revAllPlayMonster, this);
     }
 
     onDisable () {
@@ -106,6 +113,7 @@ export class GameManager extends Component {
         clientEvent.off(constant.EVENT_TYPE.REFRESH_LEVEL, this._refreshLevel, this);
         clientEvent.off(constant.EVENT_TYPE.RECYCLE_ALL, this._recycleAll, this);
         clientEvent.off(constant.EVENT_TYPE.MONSTER_REVIVE, this._revPlayerMonster, this);
+        clientEvent.off(constant.EVENT_TYPE.ON_REVIVE, this._revAllPlayMonster, this);
     }
 
     start () {
@@ -177,6 +185,9 @@ export class GameManager extends Component {
         GameManager.ndBoss = null!;
         GameManager.existentNum = 0;
 
+        this._card1Count = this._card2Count = this._card3Count = 0;
+        this._playerGold = playerData.instance.playerInfo.gold
+
         playerData.instance.addFightTimes();
 
         AudioManager.instance.pauseAll();
@@ -226,13 +237,23 @@ export class GameManager extends Component {
      * 刷新关卡, 后期优化写法。。。
      */
     private _refreshLevel () {
-        let playMonsterCount = 0;
         for (let i = 0; i < GameManager.arrPlayer.length; i++) {
             if (!GameManager.arrPlayer[i].getComponent(Monster)?.isDie) {
-                playMonsterCount++;
+                switch (GameManager.arrPlayer[i].getComponent(Monster)?.node.name) {
+                    case "aula":
+                        this._card1Count++;
+                        break;
+                    case this._card2name:
+                        this._card2Count++;
+                        break;
+                    case 'dragon':
+                        this._card3Count++;
+                        break;
+                    default:
+                        break;
+                }
             }
         }
-        console.log("playMonsterCount", playMonsterCount);
 
         //每层随机一张地图
         let arrMap = this.mapInfo.mapName.split("#");
@@ -254,16 +275,12 @@ export class GameManager extends Component {
                     GameManager.arrPlayer = [];
 
                     // 重新创建原有数量的小怪
-                    for(let i = 0; i < playMonsterCount; i++) {
+                    for(let i = 0; i < this._card1Count; i++) {
                         this._createAula();
                     }
-
-                    // 设置初始位置
-                    GameManager.arrPlayer.forEach((monster, index) => {
-                        const baseX = -10.65;
-                        const xOffset = index * (6/playMonsterCount);
-                        monster.setPosition(new Vec3(baseX + xOffset, 1.62, -3 + xOffset));
-                    });
+                    for(let i = 0; i < this._card2Count; i++) {
+                        this._createMagician();
+                    }
 
                     clientEvent.dispatchEvent(constant.EVENT_TYPE.HIDE_LOADING_PANEL);
                 }
@@ -312,8 +329,6 @@ export class GameManager extends Component {
                 clientEvent.dispatchEvent(constant.EVENT_TYPE.HIDE_LOADING_PANEL);
             }
         })
-
-        this._createAula();
     }
 
     private _createAula(is_move: boolean=false) {
@@ -330,7 +345,7 @@ export class GameManager extends Component {
             // ndChild.setPosition(new Vec3(Number(position[0]), Number(position[1]), Number(position[2])));
             ndChild.eulerAngles = new Vec3(Number(angle[0]), Number(angle[1]), Number(angle[2]));
             ndChild.setScale(new Vec3(Number(scale[0]), Number(scale[1]), Number(scale[2])));
-            ndChild.setPosition(new Vec3(-10.65,1.65, 0));
+            ndChild.setPosition(new Vec3(-10.65+ (Math.random() * 5 - 2),1.65 , 1 + (Math.random() * 5 - 2)));
 
             let rigidBody = ndChild.getComponent(RigidBody) as RigidBody;
             rigidBody.setGroup(constant.PHY_GROUP.PLAYER)
@@ -351,14 +366,111 @@ export class GameManager extends Component {
         })
     }
 
+    private _createMagician(is_move: boolean=false) {
+        // 创建玩家的小怪
+        resourceUtil.loadModelRes("monster/magician").then((pf: any)=>{
+            let ndChild = poolManager.instance.getNode(pf, this.node, true) as Node;
+            GameManager.arrPlayer.push(ndChild as Node);
+
+            let baseInfo = localConfig.instance.queryByID("base", constant.BASE.AULA);
+
+            // let position = baseInfo.position.split(',');
+            let angle = baseInfo.angle.split(',');
+            let scale = baseInfo.scale.split(',');
+            // ndChild.setPosition(new Vec3(Number(position[0]), Number(position[1]), Number(position[2])));
+            ndChild.eulerAngles = new Vec3(Number(angle[0]), Number(angle[1]), Number(angle[2]));
+            ndChild.setScale(new Vec3(Number(scale[0]), Number(scale[1]), Number(scale[2])));
+            ndChild.setPosition(new Vec3(-12.65 + Math.random() * 6 - 3, 1.65, 3 + (Math.random() * 6 - 3)));
+
+            let rigidBody = ndChild.getComponent(RigidBody) as RigidBody;
+            rigidBody.setGroup(constant.PHY_GROUP.PLAYER)
+
+            let layinfo = {
+                ID: "2003",
+                position: "-12.65,1.65, 3",
+                angle: "",
+                scale:"",
+                skill:"106",
+                movePattern: 1
+            }
+            ndChild.getComponent(Monster)?.init(baseInfo, layinfo);
+
+            if (is_move) {
+                clientEvent.dispatchEvent(constant.EVENT_TYPE.MONSTER_MOVE);
+            }
+        })
+    }
+
+    private _createHellFire(is_move: boolean=false) {
+        // 创建玩家的小怪
+        resourceUtil.loadModelRes("monster/hellFire").then((pf: any)=>{
+            let ndChild = poolManager.instance.getNode(pf, this.node, true) as Node;
+            GameManager.arrPlayer.push(ndChild as Node);
+
+            let baseInfo = localConfig.instance.queryByID("base", constant.BASE.AULA);
+
+            // let position = baseInfo.position.split(',');
+            let angle = baseInfo.angle.split(',');
+            let scale = baseInfo.scale.split(',');
+            // ndChild.setPosition(new Vec3(Number(position[0]), Number(position[1]), Number(position[2])));
+            ndChild.eulerAngles = new Vec3(Number(angle[0]), Number(angle[1]), Number(angle[2]));
+            ndChild.setScale(new Vec3(Number(scale[0]), Number(scale[1]), Number(scale[2])));
+            ndChild.setPosition(new Vec3(-10.65,1.65, -3));
+
+            let rigidBody = ndChild.getComponent(RigidBody) as RigidBody;
+            rigidBody.setGroup(constant.PHY_GROUP.PLAYER)
+
+            let layinfo = {
+                ID: "2004",
+                position: "-10.65,1.65, -3",
+                angle: "",
+                scale:"",
+                skill:"104",
+                movePattern: 1
+            }
+            ndChild.getComponent(Monster)?.init(baseInfo, layinfo);
+
+            if (is_move) {
+                clientEvent.dispatchEvent(constant.EVENT_TYPE.MONSTER_MOVE);
+            }
+        })
+    }
+
     private _revPlayerMonster (id: number) {
         if (GameManager.isGameOver) {
             return;
         }
-        if (id === 1) { //玩家
-            // 创建玩家的小怪, 并马上行动
-            this._createAula(true);
+        switch (id) {
+            case 1:
+                // 创建玩家的小怪, 并马上行动
+                this._createAula(true);
+                break;
+            case 2:
+                this._createMagician(true);
+                break;
+            default:
+                break;
         }
+    }
+
+    private _revAllPlayMonster() {
+        playerData.instance.playerInfo.gold = this._playerGold;
+        clientEvent.dispatchEvent(constant.EVENT_TYPE.REFRESH_GOLD);
+
+        // 清除现有小怪节点
+        GameManager.arrPlayer.forEach(monster => {
+            poolManager.instance.putNode(monster);
+        });
+        GameManager.arrPlayer = [];
+
+        // 重新创建原有数量的小怪
+        for(let i = 0; i < this._card1Count; i++) {
+            this._createAula();
+        }
+        for(let i = 0; i < this._card2Count; i++) {
+            this._createHellFire();
+        }
+        this._createAula(true);
     }
 
 

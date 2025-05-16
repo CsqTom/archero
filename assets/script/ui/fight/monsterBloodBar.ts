@@ -47,6 +47,7 @@ export class MonsterBloodBar extends Component {
  * @memberof MonsterBloodBar
  */
 public show (scriptParent: any, totalBlood: number, offsetPos: Vec3, scale: Vec3, callback?: Function | null, isInit: boolean = true) {
+        console.log("--> 显示血量", scriptParent);
         this._scriptParent = scriptParent;
         this._totalBlood = totalBlood * GameManager.hpAddition;
         this._offsetPos = offsetPos;

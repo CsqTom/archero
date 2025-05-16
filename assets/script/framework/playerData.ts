@@ -127,7 +127,7 @@ export class playerData extends Component {
     public createPlayerInfo(loginData?:any) {
         this._playerInfo = {
             diamond: 0, //钻石总数
-            gold: 0,//金币数量
+            gold: 30,//金币数量
             key: 0, //钥匙数量
             level: 1,  //当前层级
             highestLevel: 1,//已经解锁的最高层级

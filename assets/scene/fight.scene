@@ -1100,12 +1100,14 @@
       "b": 0,
       "a": 181
     },
-    "_autoAdapt": false,
-    "_pcf": 3,
+    "_fixedArea": false,
+    "_pcf": 2,
     "_bias": 0.1,
     "_normalBias": 0,
     "_near": 0.01,
     "_far": 100,
+    "_shadowDistance": 100,
+    "_invisibleOcclusionRange": 200,
     "_orthoSize": 30,
     "_maxReceived": 0,
     "_size": {
