@@ -50,7 +50,8 @@ export class Boss extends Monster {
     public init(baseInfo: any, layerInfo: any) {
         this._bloodTipOffsetPos.set(0, 50, 0);
         this._hitEffectPos.set(0, 0.04, 0);
-
+        // 玩家灵宠对战，血量也要改少一些，暂定原血的30%
+        if (this._showGroup() === 'player') baseInfo.hp = baseInfo.hp * 0.3;
         this.baseInfo = baseInfo;
         this.layerInfo = layerInfo;
         this.isDie = false;
@@ -84,6 +85,13 @@ export class Boss extends Monster {
     }
 
     public refreshBlood (bloodNum: number, tipType: number) {
+        // 玩家灵宠对战，使用小血条
+        if (this._showGroup()==='player') {
+            super.refreshBlood(bloodNum, tipType);
+            return;
+        }
+
+        // 刷野生灵宠，则使用大血条
         clientEvent.dispatchEvent(constant.EVENT_TYPE.REFRESH_BOSS_BLOOD, bloodNum);
         uiManager.instance.showBloodTips(this, tipType, bloodNum, this._bloodTipOffsetPos);
     }

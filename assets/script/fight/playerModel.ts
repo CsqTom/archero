@@ -57,7 +57,7 @@ export class PlayerModel extends Component {
         }
         
         this.looseEulerAngles = this.node.parent?.eulerAngles as Vec3;
-        GameManager.scriptPlayer.throwArrowToEnemy();
+        // GameManager.scriptPlayer.throwArrowToEnemy(); // 调用玩家的攻击逻辑
         this.ndArrow.active = false;
 
         // console.log("looseEulerAngles", this.looseEulerAngles);
