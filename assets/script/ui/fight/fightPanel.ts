@@ -93,7 +93,7 @@ export class FightPanel extends Component {
     }
 
     public onBtnMonsterRevClick3 () {
-        let move_gold = playerData.instance.playerInfo.level%10 + 20;
+        let move_gold = playerData.instance.playerInfo.level + 100;
         if (move_gold > playerData.instance.playerInfo.gold)
             return
 

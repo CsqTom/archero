@@ -152,7 +152,7 @@ export class Monster extends Component {
         console.log("怪物初始化", this.node.name, this._showGroup());
 
         this.isDie = false;
-        
+
         this.recycleWarning();
 
         this._ndBody = this.node.getChildByName("body") as Node;
@@ -179,7 +179,7 @@ export class Monster extends Component {
         this._moveUnit = new Vec3();
         // this._isCloseFighting = false;
         this._movePattern = layerInfo.movePattern ? layerInfo.movePattern : this.baseInfo.movePattern;
-        
+
         this.scriptBloodBar = null!;
 
         this._refreshSkill();
@@ -190,18 +190,23 @@ export class Monster extends Component {
         this.curMoveSpeed = this.baseInfo.moveSpeed;
 
         this._getMinLength();
+
+        if (this._showGroup() === 'player') {
+            const ndEnemy = this.getNearest();
+            if (ndEnemy) this.node.forward = Vec3.subtract(this._forWard, ndEnemy.worldPosition, this.node.worldPosition).normalize();
+        }
     }
 
-    private _showGroup() {
+    protected _showGroup() {
         const rigidBody = this.getComponent(RigidBody);
         if (!rigidBody || !this.node.isValid) return null;
         if (rigidBody.getGroup() === constant.PHY_GROUP.MONSTER) {
-            return "monster"
+            return "monster";
         }
         if (rigidBody.getGroup() === constant.PHY_GROUP.PLAYER) {
-            return "player"
+            return "player";
         }
-        return "unknown"
+        return "unknown";
     }
 
     /**
@@ -776,8 +781,12 @@ export class Monster extends Component {
      * @memberof Monster
      */
     protected _lookAtTargetWorPos (targetWorPos?: Vec3) {
-        let screenPos1 = GameManager.mainCamera?.worldToScreen(GameManager.ndPlayer.worldPosition) as Vec3;
+        // 尽量向目标物，如果没有找到，只能面向玩家了。
+        let targetNd = this.getNearest() as Node;
+        if  (!targetNd) targetNd = GameManager.ndPlayer;
+        let screenPos1 = GameManager.mainCamera?.worldToScreen(targetNd.worldPosition) as Vec3;
         let screenPos2 =  GameManager.mainCamera?.worldToScreen(this.node.worldPosition) as Vec3;
+
         if (targetWorPos) {
             screenPos1 = GameManager.mainCamera?.worldToScreen(targetWorPos) as Vec3;
         }

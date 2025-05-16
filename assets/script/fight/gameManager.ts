@@ -205,7 +205,7 @@ export class GameManager extends Component {
         // 显示倒计时UI（需要先在uiManager中实现对应的面板）
         // uiManager.instance.showDialog("countdown/countdownPanel");
 
-        this._countdownValue = 3; // 倒计时N秒
+        this._countdownValue = 5; // 倒计时N秒
         GameManager.isGameStart = false;
 
         // 每秒更新一次倒计时
@@ -281,6 +281,9 @@ export class GameManager extends Component {
                     for(let i = 0; i < this._card2Count; i++) {
                         this._createMagician();
                     }
+                    for(let i = 0; i < this._card3Count; i++) {
+                        this._createDragon();
+                    }
 
                     clientEvent.dispatchEvent(constant.EVENT_TYPE.HIDE_LOADING_PANEL);
                 }
@@ -345,7 +348,8 @@ export class GameManager extends Component {
             // ndChild.setPosition(new Vec3(Number(position[0]), Number(position[1]), Number(position[2])));
             ndChild.eulerAngles = new Vec3(Number(angle[0]), Number(angle[1]), Number(angle[2]));
             ndChild.setScale(new Vec3(Number(scale[0]), Number(scale[1]), Number(scale[2])));
-            ndChild.setPosition(new Vec3(-10.65+ (Math.random() * 5 - 2),1.65 , 1 + (Math.random() * 5 - 2)));
+            // x前位置，越大超向前； y水平,越小越高； z左右位置，0为中间，负数为左，正数为右
+            ndChild.setPosition(new Vec3(-9.65+ (Math.random() * 6 - 3),1.65 , -3 + (Math.random() * 6 - 3)));
 
             let rigidBody = ndChild.getComponent(RigidBody) as RigidBody;
             rigidBody.setGroup(constant.PHY_GROUP.PLAYER)
@@ -372,7 +376,7 @@ export class GameManager extends Component {
             let ndChild = poolManager.instance.getNode(pf, this.node, true) as Node;
             GameManager.arrPlayer.push(ndChild as Node);
 
-            let baseInfo = localConfig.instance.queryByID("base", constant.BASE.AULA);
+            let baseInfo = localConfig.instance.queryByID("base", constant.BASE.MAGICIAN);
 
             // let position = baseInfo.position.split(',');
             let angle = baseInfo.angle.split(',');
@@ -380,7 +384,7 @@ export class GameManager extends Component {
             // ndChild.setPosition(new Vec3(Number(position[0]), Number(position[1]), Number(position[2])));
             ndChild.eulerAngles = new Vec3(Number(angle[0]), Number(angle[1]), Number(angle[2]));
             ndChild.setScale(new Vec3(Number(scale[0]), Number(scale[1]), Number(scale[2])));
-            ndChild.setPosition(new Vec3(-12.65 + Math.random() * 6 - 3, 1.65, 3 + (Math.random() * 6 - 3)));
+            ndChild.setPosition(new Vec3(-9.65 + Math.random() * 6 - 3, 1.65, 3 + (Math.random() * 6 - 3)));
 
             let rigidBody = ndChild.getComponent(RigidBody) as RigidBody;
             rigidBody.setGroup(constant.PHY_GROUP.PLAYER)
@@ -401,13 +405,48 @@ export class GameManager extends Component {
         })
     }
 
+    private _createDragon(is_move: boolean=false) {
+        // 创建玩家的小怪
+        resourceUtil.loadModelRes("boss/dragon").then((pf: any)=>{
+            let ndChild = poolManager.instance.getNode(pf, this.node, true) as Node;
+            GameManager.arrPlayer.push(ndChild as Node);
+
+            let baseInfo = localConfig.instance.queryByID("base", constant.BASE.BOSS_01);
+
+            // let position = baseInfo.position.split(',');
+            let angle = baseInfo.angle.split(',');
+            let scale = baseInfo.scale.split(',');
+            // ndChild.setPosition(new Vec3(Number(position[0]), Number(position[1]), Number(position[2])));
+            ndChild.eulerAngles = new Vec3(Number(angle[0]), Number(angle[1]), Number(angle[2]));
+            ndChild.setScale(new Vec3(Number(scale[0]), Number(scale[1]), Number(scale[2])));
+            ndChild.setPosition(new Vec3(-8.65 + Math.random() * 6 - 3, 1.65, 0.1 + (Math.random() * 6 - 3)));
+
+            let rigidBody = ndChild.getComponent(RigidBody) as RigidBody;
+            rigidBody.setGroup(constant.PHY_GROUP.PLAYER)
+
+            let layinfo = {
+                ID: "3001",
+                position: "-12.65,1.65, 3",
+                angle: "",
+                scale:"",
+                skill:"103#106",
+                movePattern: 2
+            }
+            ndChild.getComponent(Boss)?.init(baseInfo, layinfo);
+
+            if (is_move) {
+                clientEvent.dispatchEvent(constant.EVENT_TYPE.MONSTER_MOVE);
+            }
+        })
+    }
+
     private _createHellFire(is_move: boolean=false) {
         // 创建玩家的小怪
         resourceUtil.loadModelRes("monster/hellFire").then((pf: any)=>{
             let ndChild = poolManager.instance.getNode(pf, this.node, true) as Node;
             GameManager.arrPlayer.push(ndChild as Node);
 
-            let baseInfo = localConfig.instance.queryByID("base", constant.BASE.AULA);
+            let baseInfo = localConfig.instance.queryByID("base", constant.BASE.HELL_FIRE);
 
             // let position = baseInfo.position.split(',');
             let angle = baseInfo.angle.split(',');
@@ -448,6 +487,9 @@ export class GameManager extends Component {
             case 2:
                 this._createMagician(true);
                 break;
+            case 3:
+                this._createDragon(true);
+                break;
             default:
                 break;
         }
@@ -470,7 +512,10 @@ export class GameManager extends Component {
         for(let i = 0; i < this._card2Count; i++) {
             this._createHellFire();
         }
-        this._createAula(true);
+        for(let i = 0; i < this._card3Count; i++) {
+            this._createDragon();
+        }
+        this._createAula(true);//复活多送一只
     }
 
 

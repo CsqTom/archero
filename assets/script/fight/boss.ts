@@ -76,6 +76,11 @@ export class Boss extends Monster {
         this._movePattern = layerInfo.movePattern ? layerInfo.movePattern : this.baseInfo.movePattern;
 
         super._getMinLength();
+
+        if (this._showGroup() === 'player') {
+            const ndEnemy = this.getNearest();
+            if (ndEnemy) this.node.forward = Vec3.subtract(this._forWard, ndEnemy.worldPosition, this.node.worldPosition).normalize();
+        }
     }
 
     public refreshBlood (bloodNum: number, tipType: number) {
