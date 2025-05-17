@@ -21,10 +21,22 @@ export class FightPanel extends Component {
     @property(LabelComponent)
     public lbLevel: LabelComponent = null!;//等级
 
+    @property(LabelComponent)
+    public lbCardC1: LabelComponent = null!;//卡1的花费
+
+    @property(LabelComponent)
+    public lbCardC2: LabelComponent = null!;//卡2的花费
+
+    @property(LabelComponent)
+    public lbCardC3: LabelComponent = null!;//卡3的花费
+
     @property(Node)
     public ndBossBloodBar: Node = null!;//boss血量进度条节点
 
     private _debugClickTimes: number = 0;//调试点击次数
+    private _car1_shop: number = 5;
+    private _car2_shop: number = 10;
+    private _car3_shop: number = 50;
 
     onEnable () {
         clientEvent.on(constant.EVENT_TYPE.REFRESH_GOLD, this._refreshGold, this);
@@ -36,9 +48,22 @@ export class FightPanel extends Component {
         clientEvent.off(constant.EVENT_TYPE.REFRESH_LEVEL, this._refreshLevel, this);
     }
 
+
+
     start () {
-        // [3]
+        // 开启就刷新下
+        this._refreshCardShop();
+
+        // 每N秒加一次金币
+        setInterval(() => {
+            this._refreshCardShop();
+
+            if (GameManager.isGamePause || GameManager.isGameOver || !GameManager.isGameStart)
+                return;
+            GameManager.addGold(1);
+        }, 5000);
     }
+
 
     show () {
         this.ndBossBloodBar.active = false;
@@ -63,6 +88,12 @@ export class FightPanel extends Component {
         this.lbLevel.string = `第${playerData.instance.playerInfo.level}层`;
     }
 
+    private _refreshCardShop () {
+        this.lbCardC1.string = util.formatMoney(playerData.instance.playerInfo.level + this._car1_shop);
+        this.lbCardC2.string = util.formatMoney(playerData.instance.playerInfo.level + this._car2_shop);
+        this.lbCardC3.string = util.formatMoney(playerData.instance.playerInfo.level + this._car3_shop);
+    }
+
     public onBtnPauseClick () {
         AudioManager.instance.playSound(constant.SOUND.CLICK);
 
@@ -71,7 +102,7 @@ export class FightPanel extends Component {
     }
 
     public onBtnMonsterRevClick () {
-        let move_gold = playerData.instance.playerInfo.level%10 + 5;
+        let move_gold = playerData.instance.playerInfo.level + this._car1_shop;
         if (move_gold > playerData.instance.playerInfo.gold)
             return
 
@@ -82,7 +113,7 @@ export class FightPanel extends Component {
     }
 
     public onBtnMonsterRevClick2 () {
-        let move_gold = playerData.instance.playerInfo.level%10 + 8;
+        let move_gold = playerData.instance.playerInfo.level + this._car2_shop;
         if (move_gold > playerData.instance.playerInfo.gold)
             return
 
@@ -93,7 +124,7 @@ export class FightPanel extends Component {
     }
 
     public onBtnMonsterRevClick3 () {
-        let move_gold = playerData.instance.playerInfo.level + 100;
+        let move_gold = playerData.instance.playerInfo.level + this._car3_shop;
         if (move_gold > playerData.instance.playerInfo.gold)
             return
 

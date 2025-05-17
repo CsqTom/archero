@@ -510,7 +510,7 @@ export class GameManager extends Component {
             this._createAula();
         }
         for(let i = 0; i < this._card2Count; i++) {
-            this._createHellFire();
+            this._createMagician();
         }
         for(let i = 0; i < this._card3Count; i++) {
             this._createDragon();

@@ -136,7 +136,7 @@ export class MonsterSkillCollider extends Component {
         }
         else if (otherCollider.getGroup() == constant.PHY_GROUP.PLAYER  || otherCollider.getGroup() == constant.PHY_GROUP.MONSTER)  {
             let scriptSkillCollider: any = null;
-
+            // console.log("### 技能来了", this.colliderName, this.node.name, "->", otherCollider.node.name);
             switch (this.colliderName) {
                 case COLLIDER_NAME.ENERGY_BALL:
                     poolManager.instance.putNode(this.node);
@@ -186,7 +186,7 @@ export class MonsterSkillCollider extends Component {
             console.warn("###找不到技能来源敌人", this.colliderName);
             return;
         }
-        console.log("###技能碰到玩家了", this.colliderName);
+        // console.log("###技能碰到玩家了", this.colliderName);
         GameManager.scriptPlayer.reduceBlood(baseInfo);
     }
 

@@ -814,6 +814,7 @@ export class Monster extends Component {
         if (!this.allSkillInfo.length) {
             let offsetLength = util.getTwoNodeXZLength(this.node, ndEnemy);
             if (offsetLength <= this._minLength * this._minLengthRatio) {
+                ndEnemy.getComponent(Monster)?.reduceBlood(this.baseInfo);
                 // GameManager.scriptPlayer.reduceBlood(this.baseInfo);
             }
             return;

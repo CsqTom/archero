@@ -50,8 +50,8 @@ export class Boss extends Monster {
     public init(baseInfo: any, layerInfo: any) {
         this._bloodTipOffsetPos.set(0, 50, 0);
         this._hitEffectPos.set(0, 0.04, 0);
-        // 玩家灵宠对战，血量也要改少一些，暂定原血的30%
-        if (this._showGroup() === 'player') baseInfo.hp = baseInfo.hp * 0.3;
+        // 玩家灵宠对战，血量也要改少一些，暂定原血的百分比%
+        if (this._showGroup() === 'player') baseInfo.hp = baseInfo.hp * 0.5;
         this.baseInfo = baseInfo;
         this.layerInfo = layerInfo;
         this.isDie = false;
